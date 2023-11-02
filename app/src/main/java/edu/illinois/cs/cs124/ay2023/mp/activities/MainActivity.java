@@ -92,6 +92,7 @@ public final class MainActivity extends AppCompatActivity
    */
   @Override
   public boolean onQueryTextChange(@NonNull String query) {
+    //update list
     listAdapter.setSummaries(Summary.filter(summaries, query));
     return true;
   }
