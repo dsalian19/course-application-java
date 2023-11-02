@@ -2,13 +2,16 @@ package edu.illinois.cs.cs124.ay2023.mp.models;
 
 import androidx.annotation.NonNull;
 import org.jetbrains.annotations.NotNull;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Model holding the course summary information shown in the summary list.
  *
  * @noinspection unused
  */
-public class Summary {
+public class Summary implements Comparable<Summary> {
   private String subject;
 
   /**
@@ -66,5 +69,32 @@ public class Summary {
   @Override
   public String toString() {
     return subject + " " + number + ": " + label;
+  }
+
+  @Override
+  public int compareTo(Summary summary) {
+    if (summary.number.compareTo(number) == 0) {
+      return -1 * summary.subject.compareTo(subject);
+    }
+    return -1 * summary.number.compareTo(number);
+  }
+
+  public static List<Summary> filter(List<Summary> list, String filter) {
+    List<Summary> newList = new ArrayList<>();
+    String word = filter.trim();
+    word = word.toLowerCase();
+    for (Summary s : list) {
+      if (s.toString().toLowerCase().contains(word)) {
+        newList.add(s);
+      }
+    }
+    Collections.sort(newList);
+    newList.sort((first, second) -> {
+      String firstString = first.toString().toLowerCase();
+      String secondString = second.toString().toLowerCase();
+      String comparedWord = filter.toLowerCase();
+      return firstString.indexOf(comparedWord) - secondString.indexOf(comparedWord);
+    });
+    return newList;
   }
 }
