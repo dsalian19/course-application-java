@@ -7,11 +7,14 @@ import androidx.annotation.NonNull;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import edu.illinois.cs.cs124.ay2023.mp.application.CourseableApplication;
+import edu.illinois.cs.cs124.ay2023.mp.models.Course;
 import edu.illinois.cs.cs124.ay2023.mp.models.Summary;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -62,6 +65,39 @@ public final class Server extends Dispatcher {
     return makeOKJSONResponse(summariesJSON);
   }
 
+
+  private MockResponse getCourse(String path) {
+    String[] temp = path.split("/");
+    // Load the JSON string
+    //noinspection CharsetObjectCanBeUsed
+    String json =
+        new Scanner(Server.class.getResourceAsStream("/courses.json"), "UTF-8")
+            .useDelimiter("\\A").next();
+
+
+    Map<Course, String> courses = new HashMap<>();
+    try {
+      // Iterate through the list of JsonNodes returned by deserialization
+      JsonNode nodes = OBJECT_MAPPER.readTree(json);
+      for (JsonNode node : nodes) {
+        // Deserialize as Summary and add to the list
+        Course course = OBJECT_MAPPER.readValue(node.toString(), Course.class);
+        courses.put(course, node.toPrettyString());
+      }
+    } catch (JsonProcessingException e) {
+      throw new IllegalStateException(e);
+    }
+    for (Course c : courses.keySet()) {
+      try {
+        if (temp[2].equals(c.getSubject()) && temp[3].equals(c.getNumber())) {
+          return makeOKJSONResponse(courses.get(c));
+        }
+      } catch (IndexOutOfBoundsException e) {
+        return HTTP_BAD_REQUEST;
+      }
+    }
+    return HTTP_NOT_FOUND;
+  }
   /**
    * HTTP request dispatcher.
    *
@@ -92,6 +128,8 @@ public final class Server extends Dispatcher {
         return new MockResponse().setBody("200: OK").setResponseCode(HttpURLConnection.HTTP_OK);
       } else if (path.equals("/summary/") && method.equals("GET")) {
         return getSummaries();
+      } else if (path.startsWith("/course/")) {
+        return getCourse(path);
       } else {
         // Default is not found
         return HTTP_NOT_FOUND;
@@ -204,8 +242,10 @@ public final class Server extends Dispatcher {
   private String loadData() {
 
     // Load the JSON string
+    //noinspection CharsetObjectCanBeUsed
     String json =
-        new Scanner(Server.class.getResourceAsStream("/courses.json")).useDelimiter("\\A").next();
+        new Scanner(Server.class.getResourceAsStream("/courses.json"), "UTF-8")
+            .useDelimiter("\\A").next();
 
     // Build the list of summaries
     List<Summary> summaries = new ArrayList<>();
@@ -215,6 +255,7 @@ public final class Server extends Dispatcher {
       for (JsonNode node : nodes) {
         // Deserialize as Summary and add to the list
         Summary summary = OBJECT_MAPPER.readValue(node.toString(), Summary.class);
+
         summaries.add(summary);
       }
       // Convert the List<Summary> to a String and return it
