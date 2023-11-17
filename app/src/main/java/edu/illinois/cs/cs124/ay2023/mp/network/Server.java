@@ -12,9 +12,9 @@ import edu.illinois.cs.cs124.ay2023.mp.models.Summary;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -65,15 +65,14 @@ public final class Server extends Dispatcher {
     return makeOKJSONResponse(summariesJSON);
   }
 
-
   private MockResponse getCourse(String path) {
     String[] temp = path.split("/");
     // Load the JSON string
     //noinspection CharsetObjectCanBeUsed
     String json =
         new Scanner(Server.class.getResourceAsStream("/courses.json"), "UTF-8")
-            .useDelimiter("\\A").next();
-
+            .useDelimiter("\\A")
+            .next();
 
     Map<Course, String> courses = new HashMap<>();
     try {
@@ -98,6 +97,7 @@ public final class Server extends Dispatcher {
     }
     return HTTP_NOT_FOUND;
   }
+
   /**
    * HTTP request dispatcher.
    *
@@ -245,7 +245,8 @@ public final class Server extends Dispatcher {
     //noinspection CharsetObjectCanBeUsed
     String json =
         new Scanner(Server.class.getResourceAsStream("/courses.json"), "UTF-8")
-            .useDelimiter("\\A").next();
+            .useDelimiter("\\A")
+            .next();
 
     // Build the list of summaries
     List<Summary> summaries = new ArrayList<>();

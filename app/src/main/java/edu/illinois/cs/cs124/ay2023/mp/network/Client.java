@@ -68,12 +68,15 @@ public final class Client {
     StringRequest courseRequest =
         new StringRequest(
             Request.Method.GET,
-            CourseableApplication.SERVER_URL + "/course/" + summary.getSubject()
-                + "/" + summary.getNumber() + "/",
+            CourseableApplication.SERVER_URL
+                + "/course/"
+                + summary.getSubject()
+                + "/"
+                + summary.getNumber()
+                + "/",
             response -> {
               try {
-                Course course1 =
-                    OBJECT_MAPPER.readValue(response, new TypeReference<>() {});
+                Course course1 = OBJECT_MAPPER.readValue(response, new TypeReference<>() {});
                 callback.accept(new ResultMightThrow<>(course1));
               } catch (JsonProcessingException e) {
                 callback.accept(new ResultMightThrow<>(e));

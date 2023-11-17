@@ -1,5 +1,6 @@
 package edu.illinois.cs.cs124.ay2023.mp.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.SearchView;
@@ -8,6 +9,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.illinois.cs.cs124.ay2023.mp.R;
 import edu.illinois.cs.cs124.ay2023.mp.adapters.SummaryListAdapter;
 import edu.illinois.cs.cs124.ay2023.mp.application.CourseableApplication;
@@ -48,7 +51,17 @@ public final class MainActivity extends AppCompatActivity
     setTitle("Search Courses");
 
     // Setup the list adapter for the list of summaries
-    listAdapter = new SummaryListAdapter(summaries, this);
+    listAdapter = new SummaryListAdapter(summaries, this, summary -> {
+      Intent courseIntent = new Intent(this, CourseActivity.class);
+      try {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String s = objectMapper.writeValueAsString(summary);
+        courseIntent.putExtra("summary", s);
+      } catch (JsonProcessingException e) {
+        throw new IllegalStateException(e.getMessage());
+      }
+      startActivity(courseIntent);
+    });
 
     // Add the list to the layout
     RecyclerView recyclerView = findViewById(R.id.recycler_view);
@@ -92,7 +105,7 @@ public final class MainActivity extends AppCompatActivity
    */
   @Override
   public boolean onQueryTextChange(@NonNull String query) {
-    //update list
+    // update list
     listAdapter.setSummaries(Summary.filter(summaries, query));
     return true;
   }

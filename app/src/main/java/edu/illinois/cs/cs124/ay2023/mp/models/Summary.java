@@ -1,10 +1,10 @@
 package edu.illinois.cs.cs124.ay2023.mp.models;
 
 import androidx.annotation.NonNull;
-import org.jetbrains.annotations.NotNull;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Model holding the course summary information shown in the summary list.
@@ -89,12 +89,13 @@ public class Summary implements Comparable<Summary> {
       }
     }
     Collections.sort(newList);
-    newList.sort((first, second) -> {
-      String firstString = first.toString().toLowerCase();
-      String secondString = second.toString().toLowerCase();
-      String comparedWord = filter.toLowerCase();
-      return firstString.indexOf(comparedWord) - secondString.indexOf(comparedWord);
-    });
+    newList.sort(
+        (first, second) -> {
+          String firstString = first.toString().toLowerCase();
+          String secondString = second.toString().toLowerCase();
+          String comparedWord = filter.toLowerCase();
+          return firstString.indexOf(comparedWord) - secondString.indexOf(comparedWord);
+        });
     return newList;
   }
 }
