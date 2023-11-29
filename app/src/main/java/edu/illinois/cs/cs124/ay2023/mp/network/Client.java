@@ -22,6 +22,7 @@ import edu.illinois.cs.cs124.ay2023.mp.application.CourseableApplication;
 import edu.illinois.cs.cs124.ay2023.mp.helpers.ResultMightThrow;
 import edu.illinois.cs.cs124.ay2023.mp.models.Course;
 import edu.illinois.cs.cs124.ay2023.mp.models.Summary;
+import edu.illinois.cs.cs124.ay2023.mp.models.Rating;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -86,6 +87,13 @@ public final class Client {
     requestQueue.add(courseRequest);
   }
 
+  public void getRating(@NonNull Summary summary, @NonNull Consumer<ResultMightThrow<Rating>> callback) {
+    callback.accept(new ResultMightThrow<>(new IllegalStateException()));
+  }
+
+  public void postRating(@NonNull Rating rating, @NonNull Consumer<ResultMightThrow<Rating>> callback) {
+    callback.accept(new ResultMightThrow<>(new IllegalStateException()));
+  }
   // You should not need to modify the code below
 
   /** Client instance to implement the singleton pattern. */
