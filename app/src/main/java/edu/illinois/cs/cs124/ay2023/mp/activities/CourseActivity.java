@@ -54,6 +54,7 @@ public class CourseActivity extends AppCompatActivity
         } catch (Exception e) {
           e.printStackTrace();
         }
+        //indent
       };
   @Override
   public void onRatingChanged(RatingBar ratingBar, float ratingValue, boolean fromUser) {
