@@ -6,6 +6,7 @@ import static edu.illinois.cs.cs124.ay2023.mp.helpers.Helpers.OBJECT_MAPPER;
 import android.os.Build;
 import android.util.Log;
 import androidx.annotation.NonNull;
+import com.android.volley.AuthFailureError;
 import com.android.volley.Cache;
 import com.android.volley.ExecutorDelivery;
 import com.android.volley.Network;
@@ -18,6 +19,7 @@ import com.android.volley.toolbox.NoCache;
 import com.android.volley.toolbox.StringRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.illinois.cs.cs124.ay2023.mp.application.CourseableApplication;
 import edu.illinois.cs.cs124.ay2023.mp.helpers.ResultMightThrow;
 import edu.illinois.cs.cs124.ay2023.mp.models.Course;
@@ -88,11 +90,51 @@ public final class Client {
   }
 
   public void getRating(@NonNull Summary summary, @NonNull Consumer<ResultMightThrow<Rating>> callback) {
-    callback.accept(new ResultMightThrow<>(new IllegalStateException()));
+    StringRequest ratingRequest = new StringRequest(
+        Request.Method.GET,
+          CourseableApplication.SERVER_URL  + "/rating/"
+          + summary.getSubject() + "/"
+          + summary.getNumber() + "/",
+        response -> {
+          try {
+            Rating rating = OBJECT_MAPPER.readValue(response, Rating.class);
+            if (rating != null) {
+              rating = new Rating(summary, rating.getRating());
+            }
+            callback.accept(new ResultMightThrow<>(rating));
+          } catch (JsonProcessingException e) {
+            callback.accept(new ResultMightThrow<>(e));
+          }
+        },
+        error -> callback.accept(new ResultMightThrow<>(error)));
+    requestQueue.add(ratingRequest);
   }
 
   public void postRating(@NonNull Rating rating, @NonNull Consumer<ResultMightThrow<Rating>> callback) {
-    callback.accept(new ResultMightThrow<>(new IllegalStateException()));
+    StringRequest ratingRequest = new StringRequest(
+        Request.Method.POST,
+          CourseableApplication.SERVER_URL + "/rating/",
+        response -> {
+          callback.accept(new ResultMightThrow<>(rating));
+        },
+        error -> callback.accept(new ResultMightThrow<>(error))) {
+
+      public String getBodyContentType() {
+        return "application/json; charset=utf-8";
+      }
+
+      public byte[] getBody() throws AuthFailureError {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = null;
+        try {
+          json = objectMapper.writeValueAsString(rating);
+        } catch (JsonProcessingException e) {
+          throw new RuntimeException(e);
+        }
+        return json.getBytes();
+      }
+    };
+    requestQueue.add(ratingRequest);
   }
   // You should not need to modify the code below
 

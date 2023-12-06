@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import edu.illinois.cs.cs124.ay2023.mp.application.CourseableApplication;
 import edu.illinois.cs.cs124.ay2023.mp.models.Course;
+import edu.illinois.cs.cs124.ay2023.mp.models.Rating;
 import edu.illinois.cs.cs124.ay2023.mp.models.Summary;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -39,7 +40,7 @@ import okhttp3.mockwebserver.RecordedRequest;
 public final class Server extends Dispatcher {
   /** List of summaries as a JSON string. */
   private final String summariesJSON;
-
+  private Map<String, Rating> ratings = new HashMap<>();
   /** Helper method to create a 200 HTTP response with a body. */
   private MockResponse makeOKJSONResponse(@NonNull String body) {
     return new MockResponse()
@@ -98,6 +99,40 @@ public final class Server extends Dispatcher {
     return HTTP_NOT_FOUND;
   }
 
+  private MockResponse getRating(String path) throws JsonProcessingException {
+    String[] ratingPath = path.split("/");
+    for (String s : ratings.keySet()) {
+      try {
+        if (path.contains(s)) {
+          return makeOKJSONResponse(
+              OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(ratings.get(s)));
+        }
+        String check = ratingPath[3];
+      } catch (Exception e) {
+        return HTTP_BAD_REQUEST;
+      }
+    }
+    return HTTP_NOT_FOUND;
+  }
+
+  private MockResponse postRating(RecordedRequest request) {
+    String body = request.getBody().readUtf8();
+    try {
+      Rating rating = OBJECT_MAPPER.readValue(body, Rating.class);
+      rating = new Rating(rating.getSummary(), rating.getRating());
+      String ratingPath = rating.getSummary().getSubject() + "/" + rating.getSummary().getNumber();
+      if (ratings.containsKey(ratingPath)) {
+        ratings.put(ratingPath, rating);
+        return new MockResponse()
+            .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP)
+            .setHeader("Location", ratingPath);
+      } else {
+        return HTTP_NOT_FOUND;
+      }
+    } catch (JsonProcessingException e) {
+      return HTTP_BAD_REQUEST;
+    }
+  }
   /**
    * HTTP request dispatcher.
    *
@@ -125,11 +160,17 @@ public final class Server extends Dispatcher {
             .setResponseCode(HttpURLConnection.HTTP_OK);
       } else if (path.equals("/reset/") && method.equals("GET")) {
         // Used to reset the server during testing
+        ratings.clear();
+        loadData();
         return new MockResponse().setBody("200: OK").setResponseCode(HttpURLConnection.HTTP_OK);
       } else if (path.equals("/summary/") && method.equals("GET")) {
         return getSummaries();
       } else if (path.startsWith("/course/")) {
         return getCourse(path);
+      } else if (path.startsWith("/rating/") && method.equals("GET")) {
+        return getRating(path);
+      } else if (path.startsWith("/rating/") && method.equals("POST")) {
+        return postRating(request);
       } else {
         // Default is not found
         return HTTP_NOT_FOUND;
@@ -258,6 +299,9 @@ public final class Server extends Dispatcher {
         Summary summary = OBJECT_MAPPER.readValue(node.toString(), Summary.class);
 
         summaries.add(summary);
+
+        String ratingPath = summary.getSubject() + "/" + summary.getNumber();
+        ratings.put(ratingPath, new Rating());
       }
       // Convert the List<Summary> to a String and return it
       return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(summaries);
