@@ -89,7 +89,8 @@ public final class Client {
     requestQueue.add(courseRequest);
   }
 
-  public void getRating(@NonNull Summary summary, @NonNull Consumer<ResultMightThrow<Rating>> callback) {
+  public void getRating(@NonNull Summary summary,
+                        @NonNull Consumer<ResultMightThrow<Rating>> callback) {
     StringRequest ratingRequest = new StringRequest(
         Request.Method.GET,
           CourseableApplication.SERVER_URL  + "/rating/"
@@ -109,8 +110,8 @@ public final class Client {
         error -> callback.accept(new ResultMightThrow<>(error)));
     requestQueue.add(ratingRequest);
   }
-
-  public void postRating(@NonNull Rating rating, @NonNull Consumer<ResultMightThrow<Rating>> callback) {
+  public void postRating(@NonNull Rating rating,
+                         @NonNull Consumer<ResultMightThrow<Rating>> callback) {
     StringRequest ratingRequest = new StringRequest(
         Request.Method.POST,
           CourseableApplication.SERVER_URL + "/rating/",

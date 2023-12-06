@@ -4,7 +4,7 @@ public class Rating {
   public static final float NOT_RATED = -1.0f;
   private float rating = NOT_RATED;
   private Summary summary;
-  public Rating () { }
+  public Rating() { }
   public Rating(Summary setSummary, float setRating) {
     rating = setRating;
     summary = setSummary;
