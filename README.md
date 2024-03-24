@@ -1,4 +1,2 @@
-# CS 124 2023–2024 Machine Project (MP)
+Application allowing users to browse and rate courses at UIUC. Built with Java
 
-This is the Java starter code for the 2023–2024 CS 124 machine project (MP).
-More information is available [here](https://cs124.org/MP/).
